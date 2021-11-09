@@ -6,8 +6,8 @@ const { MongoClient } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+app.use(cors())
+app.use(express.json())
 
 
 require('dotenv').config()
@@ -20,6 +20,17 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
+
+
+        const database = client.db('marotic');
+        const productCollection = database.collection('products');
+
+        // get products api 
+        app.get('/products', async (req, res) => {
+            const product = productCollection.find({});
+            const products = await product.toArray();
+            res.send(products);
+        })
 
 
     }
