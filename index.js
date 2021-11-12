@@ -35,6 +35,17 @@ async function run() {
             const products = await product.toArray();
             res.send(products);
         })
+
+
+        // post api for add product to database
+
+        app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
+        })
+
+
         // get customers review
 
         app.get('/reviews', async (req, res) => {
@@ -43,6 +54,12 @@ async function run() {
             res.send(users)
         })
 
+
+        app.post('/reviews', async (req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        })
         // get single product details api
 
         app.get('/product/:id', async (req, res) => {
@@ -52,13 +69,35 @@ async function run() {
             res.send(product)
 
         })
+
+
+
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await userCollection.findOne(query);
+            let isAdmin = false;
+            if (result?.role === 'admin') {
+                isAdmin = true;
+            }
+
+            res.send({ isAdmin: isAdmin });
+        })
         // post api for insert user
 
         app.post('/user', async (req, res) => {
-            console.log(req.body);
             const newUser = req.body;
             const result = await userCollection.insertOne(newUser);
             res.send(result);
+        })
+
+
+        app.put('/users/makeAdmin', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const updateDoc = { $set: { role: 'admin' } };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result)
         })
 
 
@@ -114,9 +153,10 @@ async function run() {
             const filter = { _id: ObjectId(id) };
             const updateDoc = { $set: { status: 'shipped' } };
             const result = await orderCollection.updateOne(filter, updateDoc);
-            console.log(result);
             res.send(result);
-        })
+        });
+
+
 
 
     }
